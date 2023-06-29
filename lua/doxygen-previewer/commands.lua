@@ -14,6 +14,10 @@ local M = {}
 ---@param opts? DoxygenPreviewerOptions
 function M.update(opts)
   opts = config.get(opts)
+  if vim.fn.executable(opts.doxygen) ~= 1 then
+    vim.notify(string.format("[doxygen-previewer] %s is not executable", opts.doxygen), vim.log.levels.ERROR)
+    return
+  end
 
   doxygen.generate_docs(opts, function(obj)
     if obj.code ~= 0 then
@@ -28,9 +32,13 @@ end
 ---@param opts? DoxygenPreviewerOptions
 function M.open(opts)
   opts = config.get(opts)
-  local paths = util.previewer_paths(opts)
+  if vim.fn.executable(opts.doxygen) ~= 1 then
+    vim.notify(string.format("[doxygen-previewer] %s is not executable", opts.doxygen), vim.log.levels.ERROR)
+    return
+  end
 
   -- create temporary dir
+  local paths = util.previewer_paths(opts)
   vim.loop.fs_mkdir(paths.temp_root, 493)
 
   -- copy doxyfile or create default
