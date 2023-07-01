@@ -2,6 +2,7 @@ local util = require "doxygen-previewer.util"
 local config = require "doxygen-previewer.config"
 local viewer = require "doxygen-previewer.viewer"
 local doxygen = require "doxygen-previewer.doxygen"
+local log = require "doxygen-previewer.log"
 
 local M = {}
 
@@ -45,7 +46,7 @@ function M.open(opts)
   doxygen.generate_docs(
     opts,
     vim.schedule_wrap(function(obj)
-      -- logger.info(obj.stdout)
+      log.append(obj.stdout)
       if obj.code ~= 0 then
         util.notify(string.format("doxygen exited with code %d.", obj.code), "error")
         return
@@ -98,10 +99,15 @@ function M.stop()
   viewer.updatejob.stop()
 end
 
+function M.log()
+  log.open()
+end
+
 function M.setup()
   vim.api.nvim_create_user_command("DoxygenOpen", M.open, {})
   vim.api.nvim_create_user_command("DoxygenUpdate", M.update, {})
   vim.api.nvim_create_user_command("DoxygenStop", M.stop, {})
+  vim.api.nvim_create_user_command("DoxygenLog", M.log, {})
 end
 
 return M
