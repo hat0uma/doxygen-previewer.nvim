@@ -3,6 +3,15 @@ local path_sep = is_windows and "\\" or "/"
 
 local M = {}
 
+--- notify
+---@param msg string
+---@param level number|string|nil
+function M.notify(msg, level)
+  vim.notify(msg, level or "info", {
+    title = "doxygen-previewer",
+  })
+end
+
 --- join path elements
 ---@vararg string
 ---@return string

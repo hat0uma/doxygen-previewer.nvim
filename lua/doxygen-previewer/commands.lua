@@ -2,38 +2,18 @@ local util = require "doxygen-previewer.util"
 local config = require "doxygen-previewer.config"
 local viewer = require "doxygen-previewer.viewer"
 local doxygen = require "doxygen-previewer.doxygen"
-local logger = require("plenary.log").new {
-  plugin = "doxygen-previewer",
-  level = "info",
-  use_console = false,
-}
 
 local M = {}
 
---- update docs
----@param opts? DoxygenPreviewerOptions
-function M.update(opts)
-  opts = config.get(opts)
-  if vim.fn.executable(opts.doxygen) ~= 1 then
-    vim.notify(string.format("[doxygen-previewer] %s is not executable", opts.doxygen), vim.log.levels.ERROR)
-    return
-  end
-
-  doxygen.generate_docs(opts, function(obj)
-    if obj.code ~= 0 then
-      error(string.format("[doxygen-previewer] doxygen exited with code %d.", obj.code))
-      return
-    end
-    vim.notify "[doxygen-previewer] generate docs completed."
-  end)
-end
+--- @type integer|nil
+M.preview_buffer = nil
 
 --- generate docs and open viewer
 ---@param opts? DoxygenPreviewerOptions
 function M.open(opts)
   opts = config.get(opts)
   if vim.fn.executable(opts.doxygen) ~= 1 then
-    vim.notify(string.format("[doxygen-previewer] %s is not executable", opts.doxygen), vim.log.levels.ERROR)
+    util.notify(string.format("%s is not executable", opts.doxygen), "error")
     return
   end
 
@@ -45,11 +25,11 @@ function M.open(opts)
   if vim.loop.fs_access(opts.project_doxyfile, "R") then
     local success = vim.loop.fs_copyfile(opts.project_doxyfile, paths.temp_doxyfile)
     if not success then
-      error "[doxygen-previewer] copy doxyfile failed."
+      error "copy doxyfile failed."
       return
     end
   else
-    vim.notify "[doxygen-previewer] Doxyfile does not exist. Generate with default settings."
+    util.notify "Doxyfile does not exist. Generate with default settings."
     doxygen.generate_doxyfile(opts)
   end
 
@@ -60,26 +40,68 @@ function M.open(opts)
   )
 
   -- run doxygen
+  util.notify "generate docs started."
+  M.preview_buffer = bufnr
   doxygen.generate_docs(
     opts,
     vim.schedule_wrap(function(obj)
-      logger.info(obj.stdout)
+      -- logger.info(obj.stdout)
       if obj.code ~= 0 then
-        error(string.format("[doxygen-previewer] doxygen Exited with code %d.", obj.code))
+        util.notify(string.format("doxygen exited with code %d.", obj.code), "error")
         return
       end
-      vim.notify "[doxygen-previewer] generate docs completed."
+      util.notify "generate docs completed."
+      vim.api.nvim_exec_autocmds("User", { pattern = "DoxygenGenerateCompleted" })
 
       -- show output
       local html = doxygen.get_html_name(bufnr)
-      viewer[opts.viewer].open(opts, html)
+      viewer.openjob.run(opts, html)
     end)
   )
+end
+
+--- update docs
+---@param opts? DoxygenPreviewerOptions
+function M.update(opts)
+  opts = config.get(opts)
+  if vim.fn.executable(opts.doxygen) ~= 1 then
+    util.notify(string.format("%s is not executable", opts.doxygen), "error")
+  end
+
+  if M.preview_buffer == nil then
+    util.notify "Buffer in preview does not exist."
+    return
+  end
+
+  --- run doxygen
+  util.notify "generate docs started."
+  doxygen.generate_docs(
+    opts,
+    vim.schedule_wrap(function(obj)
+      if obj.code ~= 0 then
+        util.notify(string.format("doxygen exited with code %d.", obj.code), "error")
+        return
+      end
+      util.notify "generate docs completed."
+      vim.api.nvim_exec_autocmds("User", { pattern = "DoxygenGenerateCompleted" })
+
+      --- update
+      local html = doxygen.get_html_name(M.preview_buffer)
+      viewer.updatejob.run(opts, html)
+    end)
+  )
+end
+
+function M.stop()
+  M.preview_buffer = 0
+  viewer.openjob.stop()
+  viewer.updatejob.stop()
 end
 
 function M.setup()
   vim.api.nvim_create_user_command("DoxygenOpen", M.open, {})
   vim.api.nvim_create_user_command("DoxygenUpdate", M.update, {})
+  vim.api.nvim_create_user_command("DoxygenStop", M.stop, {})
 end
 
 return M

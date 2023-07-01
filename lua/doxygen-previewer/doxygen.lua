@@ -18,7 +18,6 @@ function M.default_override_options(opts)
     ["GENERATE_RTF"] = "NO",
     ["GENERATE_XML"] = "NO",
     ["EXTRACT_ALL"] = "YES",
-    ["SEARCH_INCLUDES"] = "NO",
   }
 end
 
@@ -39,7 +38,7 @@ function M.generate_doxyfile(opts)
   local paths = util.previewer_paths(opts)
   local obj = vim.system({ opts.doxygen, "-g", paths.temp_doxyfile }, { text = true }):wait()
   if obj.code ~= 0 then
-    error(string.format("[doxygen-previewer] Failed to generate doxyfile. Exited with code %d.", obj.code))
+    error(string.format("Failed to generate doxyfile. Exited with code %d.", obj.code))
   end
 end
 
