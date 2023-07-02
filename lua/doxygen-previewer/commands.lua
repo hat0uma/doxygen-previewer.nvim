@@ -10,6 +10,19 @@ local M = {}
 M.preview_bufnr = nil
 M.preview_cwd = nil
 
+--- start update on save
+---@param opts DoxygenPreviewerOptions
+---@param bufnr integer
+local function start_update(opts, bufnr)
+  vim.api.nvim_create_autocmd("BufWritePost", {
+    callback = function()
+      M.update(opts)
+    end,
+    group = vim.api.nvim_create_augroup("doxygen-previewer", {}),
+    buffer = bufnr,
+  })
+end
+
 --- generate docs and open viewer
 ---@param opts? DoxygenPreviewerOptions
 function M.open(opts)
@@ -57,6 +70,9 @@ function M.open(opts)
     -- show output
     local html = doxygen.get_html_name(M.preview_bufnr)
     viewer.openjob.run(opts, html)
+    if opts.update_on_save then
+      start_update(opts, M.preview_bufnr)
+    end
   end)
   doxygen.generate_docs(opts, M.preview_cwd, on_exit)
 end
@@ -75,13 +91,11 @@ function M.update(opts)
   end
 
   --- run doxygen
-  util.notify "generate docs started."
   local on_exit = vim.schedule_wrap(function(obj)
     if obj.code ~= 0 then
       util.notify(string.format("doxygen exited with code %d.", obj.code), "error")
       return
     end
-    util.notify "generate docs completed."
     vim.api.nvim_exec_autocmds("User", { pattern = "DoxygenGenerateCompleted" })
 
     --- update

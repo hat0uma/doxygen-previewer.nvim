@@ -7,6 +7,8 @@ M.defaults = {
   --- viewer for display doxygen output
   --- Select the viewer in `viewers` settings.
   viewer = "live-server",
+  --- If true, update automatically when saving.
+  update_on_save = true,
   --- doxygen settings section
   doxygen = {
     --- doxygen executable
