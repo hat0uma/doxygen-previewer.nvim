@@ -83,6 +83,7 @@ function M.update(opts)
   opts = config.get(opts)
   if vim.fn.executable(opts.doxygen.cmd) ~= 1 then
     util.notify(string.format("%s is not executable", opts.doxygen.cmd), "error")
+    return
   end
 
   if M.preview_bufnr == nil then
@@ -92,6 +93,7 @@ function M.update(opts)
 
   --- run doxygen
   local on_exit = vim.schedule_wrap(function(obj)
+    log.append(obj.stdout)
     if obj.code ~= 0 then
       util.notify(string.format("doxygen exited with code %d.", obj.code), "error")
       return
