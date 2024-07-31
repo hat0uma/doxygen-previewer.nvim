@@ -11,10 +11,9 @@ end
 
 --- get previewer paths
 ---@param opts DoxygenPreviewerOptions
----@return DoxygenPreviewerPaths
+---@return { temp_root: string, temp_doxyfile: string, temp_htmldir: string}
 function M.previewer_paths(opts)
   local root = vim.fs.joinpath(opts.tempdir, "doxygen-previewer")
-  --- @class DoxygenPreviewerPaths
   return {
     temp_root = root,
     temp_doxyfile = vim.fs.joinpath(root, "Doxyfile"),
