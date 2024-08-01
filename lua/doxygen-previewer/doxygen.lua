@@ -52,7 +52,7 @@ end
 --- generate doxygen document
 ---@param opts DoxygenPreviewerOptions
 ---@param cwd string
----@param on_exit fun(obj:SystemCompleted)
+---@param on_exit fun(obj:vim.SystemCompleted)
 function M.generate_docs(opts, cwd, on_exit)
   local paths = util.previewer_paths(opts)
   vim.system({ opts.doxygen.cmd, paths.temp_doxyfile }, { cwd = cwd, text = true }, on_exit)

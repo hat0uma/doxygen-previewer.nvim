@@ -46,7 +46,7 @@ local function viewer_job(kind)
     -- start new job
     local cmd = vim.list_extend({ viewer[kind].cmd }, format_cmd(opts, html_name, viewer[kind].args))
     job = vim.fn.jobstart(cmd, {
-      cwd = viewer.cwd and viewer.cwd() or vim.loop.cwd(),
+      cwd = viewer.cwd and viewer.cwd() or vim.uv.cwd(),
       env = viewer.env,
     })
     if job <= 0 then

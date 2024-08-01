@@ -28,18 +28,18 @@ end
 function M.open(opts)
   opts = config.get(opts)
   if vim.fn.executable(opts.doxygen.cmd) ~= 1 then
-    util.notify(string.format("%s is not executable", opts.doxygen.cmd), "error")
+    util.notify(string.format("%s is not executable", opts.doxygen.cmd), vim.log.levels.ERROR)
     return
   end
   -- create temporary dir
   local paths = util.previewer_paths(opts)
-  vim.loop.fs_mkdir(paths.temp_root, 493)
+  vim.uv.fs_mkdir(paths.temp_root, 493)
 
   -- copy doxyfile or create default
   local bufnr = vim.api.nvim_get_current_buf()
   local doxyfile = doxygen.find_doxyfile(opts.doxygen.doxyfile_patterns, bufnr)
   if doxyfile then
-    local ok = vim.loop.fs_copyfile(vim.fs.joinpath(doxyfile.dir, doxyfile.match), paths.temp_doxyfile)
+    local ok = vim.uv.fs_copyfile(vim.fs.joinpath(doxyfile.dir, doxyfile.match), paths.temp_doxyfile)
     if not ok then
       error "copy failed."
       return
@@ -61,7 +61,7 @@ function M.open(opts)
   local on_exit = vim.schedule_wrap(function(obj)
     log.append(obj.stdout)
     if obj.code ~= 0 then
-      util.notify(string.format("doxygen exited with code %d.", obj.code), "error")
+      util.notify(string.format("doxygen exited with code %d.", obj.code), vim.log.levels.ERROR)
       return
     end
     util.notify "generate docs completed."
@@ -82,7 +82,7 @@ end
 function M.update(opts)
   opts = config.get(opts)
   if vim.fn.executable(opts.doxygen.cmd) ~= 1 then
-    util.notify(string.format("%s is not executable", opts.doxygen.cmd), "error")
+    util.notify(string.format("%s is not executable", opts.doxygen.cmd), vim.log.levels.ERROR)
     return
   end
 
@@ -95,7 +95,7 @@ function M.update(opts)
   local on_exit = vim.schedule_wrap(function(obj)
     log.append(obj.stdout)
     if obj.code ~= 0 then
-      util.notify(string.format("doxygen exited with code %d.", obj.code), "error")
+      util.notify(string.format("doxygen exited with code %d.", obj.code), vim.log.levels.ERROR)
       return
     end
     vim.api.nvim_exec_autocmds("User", { pattern = "DoxygenGenerateCompleted" })

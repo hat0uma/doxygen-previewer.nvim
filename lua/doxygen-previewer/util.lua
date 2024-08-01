@@ -2,9 +2,9 @@ local M = {}
 
 --- notify
 ---@param msg string
----@param level number|string|nil
+---@param level number|nil
 function M.notify(msg, level)
-  vim.notify(msg, level or "info", {
+  vim.notify(msg, level or vim.log.levels.INFO, {
     title = "doxygen-previewer",
   })
 end
@@ -28,7 +28,7 @@ end
 function M.find_upward(patterns, start_dir)
   local find = function(dir)
     for _, pattern in ipairs(patterns) do
-      if vim.loop.fs_access(vim.fs.joinpath(dir, pattern), "R") then
+      if vim.uv.fs_access(vim.fs.joinpath(dir, pattern), "R") then
         return { dir = dir, match = pattern }
       end
     end
