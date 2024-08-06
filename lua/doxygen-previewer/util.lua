@@ -9,9 +9,61 @@ function M.notify(msg, level)
   })
 end
 
+---@async
+---mkdir async
+---@param path string
+---@param mode number
+---@param thread thread
+---@return boolean ok, string | nil err
+function M.mkdir_async(path, mode, thread)
+  vim.uv.fs_mkdir(path, mode, function(err, ok)
+    coroutine.resume(thread, err, ok)
+  end)
+  ---@type string|nil,boolean
+  local err, ok = coroutine.yield()
+  return ok, err
+end
+
+---@async
+---copy file async
+---@param src string
+---@param dest string
+---@param thread thread
+---@return boolean ok, string | nil err
+function M.copyfile_async(src, dest, thread)
+  vim.uv.fs_copyfile(src, dest, function(err, ok)
+    coroutine.resume(thread, err, ok)
+  end)
+  ---@type string|nil,boolean
+  local err, ok = coroutine.yield()
+  return ok, err
+end
+
+--- Start coroutine
+---@param fn async fun()
+---@vararg any
+function M.start_coroutine(fn)
+  local thread = coroutine.create(function()
+    local ok, err = pcall(fn)
+    if not ok then
+      M.notify(err, vim.log.levels.ERROR)
+    end
+  end)
+
+  coroutine.resume(thread)
+  if coroutine.status(thread) == "dead" then
+    error "Failed to start coroutine."
+  end
+end
+
+---@class DoxygenPreviewerPaths
+---@field temp_root string
+---@field temp_doxyfile string
+---@field temp_htmldir string
+
 --- get previewer paths
 ---@param opts DoxygenPreviewerOptions
----@return { temp_root: string, temp_doxyfile: string, temp_htmldir: string}
+---@return DoxygenPreviewerPaths
 function M.previewer_paths(opts)
   local root = vim.fs.joinpath(opts.tempdir, "doxygen-previewer")
   return {

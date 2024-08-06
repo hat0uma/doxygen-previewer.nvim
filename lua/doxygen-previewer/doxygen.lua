@@ -3,9 +3,9 @@ local M = {}
 
 --- default override options
 ---@param opts DoxygenPreviewerOptions
+---@param paths DoxygenPreviewerPaths
 ---@return table
-function M.default_override_options(opts)
-  local paths = util.previewer_paths(opts)
+function M.default_override_options(opts, paths)
   return {
     ["OUTPUT_DIRECTORY"] = paths.temp_root,
     ["SHORT_NAMES"] = "NO",
@@ -19,43 +19,77 @@ function M.default_override_options(opts)
   }
 end
 
---- find doxyfile
+--- Find Doxyfile
 ---@param doxyfile_patterns string[]
----@param bufnr integer
+---@param preview_file string
 ---@return {dir:string,match:string}?
-function M.find_doxyfile(doxyfile_patterns, bufnr)
-  return util.find_upward(doxyfile_patterns, vim.fs.dirname(vim.api.nvim_buf_get_name(bufnr)))
+function M.find_doxyfile(doxyfile_patterns, preview_file)
+  return util.find_upward(doxyfile_patterns, vim.fs.dirname(preview_file))
 end
 
+---@async
 --- modify doxyfile
 ---@param path string
 ---@param options table<string,string>
-function M.modify_doxyfile(path, options)
-  --  If multiple options with the same name are specified in doxyfile, doxygen will honor the last value
-  local options_text = {}
+---@param thread thread
+function M.modify_doxyfile_async(path, options, thread)
+  -- convert to key=value format for writing
+  local options_text = {} ---@type string[]
   for key, value in pairs(options) do
-    table.insert(options_text, string.format("%s=%s", key, value))
+    table.insert(options_text, string.format("%s=%s\n", key, value))
   end
-  vim.fn.writefile(options_text, path, "a")
+
+  -- open doxyfile
+  vim.uv.fs_open(path, "a", 420, function(err, fd)
+    coroutine.resume(thread, fd, err)
+  end)
+  local fd, err = coroutine.yield() ---@type integer?, string?
+  assert(fd, err)
+
+  -- append options to doxyfile
+  -- NOTE: If multiple options with the same name are specified in doxyfile, doxygen will honor the last value
+  local text = table.concat(options_text)
+  vim.uv.fs_write(fd, text, -1, function(err, bytes)
+    coroutine.resume(thread, bytes, err)
+  end)
+
+  -- close doxyfile
+  local bytes, close_err = coroutine.yield()
+  vim.uv.fs_close(fd)
+  assert(bytes, close_err)
 end
 
+---@async
 --- generate doxyfile with default settings
 ---@param opts DoxygenPreviewerOptions
-function M.generate_doxyfile(opts)
-  local paths = util.previewer_paths(opts)
-  local obj = vim.system({ opts.doxygen.cmd, "-g", paths.temp_doxyfile }, { text = true }):wait()
-  if obj.code ~= 0 then
-    error(string.format("Failed to generate doxyfile. Exited with code %d.", obj.code))
-  end
+---@param paths DoxygenPreviewerPaths
+---@param thread thread
+---@return vim.SystemCompleted
+function M.generate_doxyfile_async(opts, paths, thread)
+  -- generate doxyfile
+  vim.system({ opts.doxygen.cmd, "-g", paths.temp_doxyfile }, { text = true }, function(obj)
+    coroutine.resume(thread, obj)
+  end)
+  return coroutine.yield() ---@type vim.SystemCompleted
 end
 
---- generate doxygen document
+---@async
+---generate doxygen document
 ---@param opts DoxygenPreviewerOptions
+---@param paths DoxygenPreviewerPaths
 ---@param cwd string
----@param on_exit fun(obj:vim.SystemCompleted)
-function M.generate_docs(opts, cwd, on_exit)
-  local paths = util.previewer_paths(opts)
-  vim.system({ opts.doxygen.cmd, paths.temp_doxyfile }, { cwd = cwd, text = true }, on_exit)
+---@return vim.SystemCompleted
+function M.generate_docs_async(opts, paths, cwd)
+  local thread = coroutine.running()
+  if not thread then
+    error "this function must be called in coroutine."
+  end
+
+  -- run doxygen
+  vim.system({ opts.doxygen.cmd, paths.temp_doxyfile }, { cwd = cwd, text = true }, function(obj)
+    coroutine.resume(thread, obj)
+  end)
+  return coroutine.yield() ---@type vim.SystemCompleted
 end
 
 --- get hrtml name from source file
@@ -102,6 +136,42 @@ function M.get_html_name(bufnr)
     :gsub("%u", function(c)
       return "_" .. c:lower()
     end) .. ".html"
+end
+
+---@async
+--- Prepare doxyfile for preview
+---@param opts DoxygenPreviewerOptions
+---@param paths DoxygenPreviewerPaths
+---@param doxygen_opts table<string,string>
+---@param user_doxyfile? string
+function M.prepare_doxyfile_for_preview(opts, paths, doxygen_opts, user_doxyfile)
+  local thread = coroutine.running()
+  if not thread then
+    error "this function must be called in coroutine."
+  end
+
+  -- create temporary dir
+  local ok, err = util.mkdir_async(paths.temp_root, 493, thread)
+  if not ok and not vim.startswith(err or "", "EEXIST") then
+    error("Failed to create temporary directory. " .. (err or ""))
+  end
+
+  -- if user has doxyfile, copy it to temporary directory.
+  -- otherwise, generate doxyfile with default settings.
+  if user_doxyfile then
+    ok, err = util.copyfile_async(user_doxyfile, paths.temp_doxyfile, thread)
+    if not ok then
+      error("Failed to copy doxyfile. " .. (err or ""))
+    end
+  else
+    local obj = M.generate_doxyfile_async(opts, paths, thread)
+    if obj.code ~= 0 then
+      error(string.format("Failed to generate doxyfile. %s", obj.stderr))
+    end
+  end
+
+  -- modify doxygen options
+  M.modify_doxyfile_async(paths.temp_doxyfile, doxygen_opts, thread)
 end
 
 return M

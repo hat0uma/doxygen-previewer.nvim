@@ -6,7 +6,6 @@ local M = {}
 ---@param opts? DoxygenPreviewerOptions
 function M.setup(opts)
   config.setup(opts)
-  commands.setup()
 end
 
 M.open = commands.open
