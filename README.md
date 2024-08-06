@@ -1,14 +1,14 @@
 # doxygen-previewer.nvim
 
-A Neovim plugin for previewing doxygen documentation.
+A Neovim plugin for previewing Doxygen documentation.
 
 ![preview doxygen](https://github.com/hat0uma/doxygen-previewer.nvim/assets/55551571/d940e31b-eca4-42e7-a507-2b432f6e3533)
 
 ## Features
 
-- Live preview of doxygen generated documentation in your browser.
+- Live preview of Doxygen-generated documentation in your browser.
 - Automated updates of the documentation preview when the source code is saved.
-- Find the project's Doxyfile and use it for preview. Generate without Doxyfile is also possible.
+- Finds the project's Doxyfile and use it for previewing. Generate without a Doxyfile is also possible.
 - Doxygen options for preview are configurable.
 
 ## Requirements
@@ -50,14 +50,16 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 
 The plugin provides the following commands:
 
-- `:DoxygenOpen` - Open doxygen documentation preview. The preview is automatically updated when saving the buffer.
+- `:DoxygenOpen` - Open Doxygen documentation preview. The preview is automatically updated when saving the buffer.
 - `:DoxygenUpdate` - Manually update the preview.
-- `:DoxygenStop` - Stop the doxygen documentation preview.
-- `:DoxygenLog` - Open the doxygen generation log.
+- `:DoxygenStop` - Stop the Doxygen documentation preview.
+- `:DoxygenLog` - Open the Doxygen generation log.
 
 ## Configuration
 
-The plugin's behavior can be customized by providing a table to the setup function. Here are the defaults:
+The plugin's behavior can be customized by providing a table to the `setup` function. Here are the defaults:
+
+For live preview settings, see [prelive.nvim](https://github.com/hat0uma/prelive.nvim#Configuration).
 
 ```lua
 require("doxygen-previewer").setup({
