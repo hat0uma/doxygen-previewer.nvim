@@ -4,9 +4,6 @@ local M = {}
 M.defaults = {
   --- Path to output doxygen results
   tempdir = vim.fn.stdpath "cache",
-  --- viewer for display doxygen output
-  --- Select the viewer in `viewers` settings.
-  viewer = "live-server",
   --- If true, update automatically when saving.
   update_on_save = true,
   --- doxygen settings section
@@ -40,23 +37,6 @@ M.defaults = {
         ["RECURSIVE"] = "YES",
       }
     end,
-  },
-  --- viewer preset
-  --- By default, only live-server is available, but you can add any viewer you like.
-  --- Set the following for each viewer.
-  ---   open : command for DoxygenOpen
-  ---   update : command at DoxygenUpdate
-  ---   env : env for command execution
-  --- Also, `open` and `update` can use the following.
-  ---   {html_dir} : html generation directory
-  ---   {html_name} : html file name for preview
-  --- @type table<string,DoxygenViewer>
-  viewers = {
-    ["live-server"] = {
-      open = { cmd = "live-server", args = { "{html_dir}", "--open={html_name}" } },
-      update = nil,
-      env = nil,
-    },
   },
 }
 

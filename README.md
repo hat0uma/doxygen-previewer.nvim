@@ -2,7 +2,7 @@
 
 A Neovim plugin for previewing doxygen documentation.
 
-![preview doxygen](https://github.com/rikuma-t/doxygen-previewer.nvim/assets/55551571/d940e31b-eca4-42e7-a507-2b432f6e3533)
+![preview doxygen](https://github.com/hat0uma/doxygen-previewer.nvim/assets/55551571/d940e31b-eca4-42e7-a507-2b432f6e3533)
 
 ## Features
 
@@ -15,7 +15,7 @@ A Neovim plugin for previewing doxygen documentation.
 
 - Neovim Nightly
 - Doxygen
-- [live-server](https://www.npmjs.com/package/live-server)
+- [prelive.nvim](https://github.com/hat0uma/prelive.nvim) (for live preview)
 
 ## Installation
 
@@ -24,7 +24,8 @@ Install the plugin using your favorite package manager.
 Using [vim-plug](https://github.com/junegunn/vim-plug):
 
 ```vim
-Plug 'rikuma-t/doxygen-previewer.nvim' , { 'do': 'npm install -g live-server' }
+Plug 'hat0uma/prelive.nvim'
+Plug 'hat0uma/doxygen-previewer.nvim'
 lua require("doxygen-previewer").setup()
 ```
 
@@ -32,27 +33,17 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 
 ```lua
 {
-  "rikuma-t/doxygen-previewer.nvim",
-  build = "npm install -g live-server",
-  config = true,
+  "hat0uma/doxygen-previewer.nvim",
+  opts = {},
+  dependencies = { "hat0uma/prelive.nvim" },
+  cmd = {
+    "DoxygenOpen",
+    "DoxygenUpdate",
+    "DoxygenStop",
+    "DoxygenLog",
+  },
 }
-```
 
-If you are a lazy.nvim user and don't want to install live-server globally you can use the following configuration:
-
-```lua
-{
-  "rikuma-t/doxygen-previewer.nvim",
-  config = function (plugin)
-    require("doxygen-previewer").setup {
-      viewers = {
-        ["live-server"] = { open = { cmd = plugin.dir .. "/node_modules/.bin/live-server" } },
-      },
-      --other configurations
-    }
-  end,
-  build = "npm install live-server",
-}
 ```
 
 ## Usage
@@ -72,9 +63,6 @@ The plugin's behavior can be customized by providing a table to the setup functi
 require("doxygen-previewer").setup({
   --- Path to output doxygen results
   tempdir = vim.fn.stdpath "cache",
-  --- viewer for display doxygen output
-  --- Select the viewer in `viewers` settings.
-  viewer = "live-server",
   --- If true, update automatically when saving.
   update_on_save = true,
   --- doxygen settings section
@@ -109,23 +97,6 @@ require("doxygen-previewer").setup({
       }
     end,
   },
-  --- viewer preset
-  --- By default, only live-server is available, but you can add any viewer you like.
-  --- Set the following for each viewer.
-  ---   open : command for DoxygenOpen
-  ---   update : command at DoxygenUpdate
-  ---   env : env for command execution
-  --- Also, `open` and `update` can use the following.
-  ---   {html_dir} : html generation directory
-  ---   {html_name} : html file name for preview
-  --- @type table<string,DoxygenViewer>
-  viewers = {
-    ["live-server"] = {
-      open = { cmd = "live-server", args = { "{html_dir}", "--open={html_name}" } },
-      update = nil,
-      env = nil,
-    },
-  },
 })
 ```
 
@@ -155,18 +126,6 @@ In addition, the following options are set inside the plugin. It is recommended 
 | GENERATE_MAN     | NO              |
 | GENERATE_RTF     | NO              |
 | GENERATE_XML     | NO              |
-
-## Viewer Settings
-
-The plugin supports any viewer that can display HTML and take commands for opening and refreshing the page. Here is the default configuration for the `live-server` viewer:
-
-```lua
-["live-server"] = {
-    open = { cmd = "live-server", args = { "{html_dir}", "--open={html_name}" } },
-    update = nil,
-    env = nil,
-},
-```
 
 ## License
 
