@@ -1,13 +1,6 @@
 local M = {}
 
---- notify
----@param msg string
----@param level number|nil
-function M.notify(msg, level)
-  vim.notify(msg, level or vim.log.levels.INFO, {
-    title = "doxygen-previewer",
-  })
-end
+local log = require "doxygen-previewer.log"
 
 ---@async
 ---mkdir async
@@ -46,7 +39,7 @@ function M.start_coroutine(fn)
   local thread = coroutine.create(function()
     local ok, err = pcall(fn)
     if not ok then
-      M.notify(err, vim.log.levels.ERROR)
+      log.error("Failed to start coroutine: %s", err)
     end
   end)
 

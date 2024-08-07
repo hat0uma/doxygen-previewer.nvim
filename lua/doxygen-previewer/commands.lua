@@ -28,7 +28,7 @@ end
 function M.open(opts)
   opts = config.get(opts)
   if vim.fn.executable(opts.doxygen.cmd) ~= 1 then
-    util.notify(string.format("%s is not executable", opts.doxygen.cmd), vim.log.levels.ERROR)
+    log.error("%s is not executable", opts.doxygen.cmd)
     return
   end
 
@@ -53,16 +53,16 @@ function M.open(opts)
     M.preview_bufnr = preview_bufnr
     M.preview_cwd = preview_cwd
 
-    -- generate doxyfile
-    util.notify "Generating documentation..."
+    -- generate docs
+    log.debug "Generating documentation..."
     local obj = doxygen.generate_docs_async(opts, paths, M.preview_cwd)
-    util.notify "Documentation generated."
+    log.debug "Documentation generated."
 
     -- on generate completed
     vim.schedule(function()
-      log.append(obj.stdout)
+      log.debug(obj.stdout)
       if obj.code ~= 0 then
-        util.notify(string.format("doxygen exited with code %d.", obj.code), vim.log.levels.ERROR)
+        log.error("doxygen exited with code %d.", obj.code)
         return
       end
 
@@ -83,27 +83,27 @@ end
 function M.update(opts)
   opts = config.get(opts)
   if vim.fn.executable(opts.doxygen.cmd) ~= 1 then
-    util.notify(string.format("%s is not executable", opts.doxygen.cmd), vim.log.levels.ERROR)
+    log.error("%s is not executable", opts.doxygen.cmd)
     return
   end
 
   if M.preview_bufnr == nil then
-    util.notify "Buffer in preview does not exist."
+    log.info "Buffer in preview does not exist."
     return
   end
 
   local paths = util.previewer_paths(opts)
   util.start_coroutine(function() ---@async
     --- run doxygen
-    util.notify "Generating documentation..."
+    log.debug "Generating documentation..."
     local obj = doxygen.generate_docs_async(opts, paths, M.preview_cwd)
-    util.notify "Documentation generated."
+    log.debug "Documentation generated."
 
     -- on generate completed
     vim.schedule(function()
-      log.append(obj.stdout)
+      log.debug(obj.stdout)
       if obj.code ~= 0 then
-        util.notify(string.format("doxygen exited with code %d.", obj.code), vim.log.levels.ERROR)
+        log.error("doxygen exited with code %d.", obj.code)
         return
       end
 
@@ -119,7 +119,7 @@ function M.stop()
 end
 
 function M.log()
-  log.open()
+  vim.cmd("tabedit " .. log.LOGFILE_PATH)
 end
 
 return M

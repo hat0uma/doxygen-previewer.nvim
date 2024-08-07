@@ -1,50 +1,31 @@
 --- This module is responsible for logging the output of the doxygen command.
---- It provides a buffer to display the log.
+---@class DoxygenPreviewerLogMod: prelive.log.Logger
+local M = {
+  LOGFILE_PATH = vim.fn.stdpath "log" .. "/doxygen-previewer.log",
+}
 
-local M = {}
-M.bufnr = nil
+---@type prelive.log.Logger | nil
+local logger
 
---- Locks the buffer so that it cannot be modified.
-local function unlock()
-  vim.bo[M.bufnr].modifiable = true
-  vim.bo[M.bufnr].readonly = false
+--- setup logger
+---@return prelive.log.Logger
+function M.setup()
+  logger = require("prelive.core.log").new_logger()
+  logger.add_notify_handler(vim.log.levels.INFO, { title = "doxygen-previewer" })
+  logger.add_file_handler(vim.log.levels.DEBUG, {
+    file_path = M.LOGFILE_PATH,
+    max_backups = 0,
+    max_file_size = 1024 * 1024,
+  })
+  return logger
 end
 
---- Unlocks the buffer so that it can be modified.
-local function lock()
-  vim.bo[M.bufnr].modifiable = false
-  vim.bo[M.bufnr].readonly = true
-end
-
---- Creates the log buffer.
-local function create_buf()
-  M.bufnr = vim.api.nvim_create_buf(false, false)
-  vim.api.nvim_buf_set_name(M.bufnr, "DoxygenLog")
-
-  vim.bo[M.bufnr].filetype = "DoxygenLog"
-  vim.bo[M.bufnr].buftype = "nofile"
-end
-
---- Appends text to the log buffer.
----@param text string
-function M.append(text)
-  if M.bufnr == nil or not vim.api.nvim_buf_is_loaded(M.bufnr) then
-    create_buf()
-  end
-  unlock()
-  vim.api.nvim_buf_set_lines(M.bufnr, -1, -1, true, vim.split(text, "\n", {}))
-  lock()
-end
-
---- Opens the log buffer.
-function M.open()
-  if M.bufnr == nil or not vim.api.nvim_buf_is_loaded(M.bufnr) then
-    create_buf()
-    lock()
-  end
-
-  vim.cmd.tabnew()
-  vim.api.nvim_set_current_buf(M.bufnr)
-end
-
-return M
+return setmetatable(M, {
+  __index = function(_, key)
+    if not logger then
+      return M.setup()[key]
+    else
+      return logger[key]
+    end
+  end,
+})
