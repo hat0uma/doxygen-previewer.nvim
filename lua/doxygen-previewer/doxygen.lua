@@ -4,9 +4,19 @@ local M = {}
 --- default override options
 ---@param opts DoxygenPreviewerOptions
 ---@param paths DoxygenPreviewerPaths
----@return table
+---@return table<string,string>
 function M.default_override_options(opts, paths)
   return {
+    --- By default, to reduce execution time, override the setting so that only files with the same name and different extension (for C/C++ headers) as the file to be previewed are generated.
+    -- include .h,.c,cpp
+    ["INPUT"] = ".",
+    ["FILE_PATTERNS"] = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(0), ":t:r") .. ".*",
+    ["EXCLUDE_PATTERNS"] = table.concat({ "*/.git/*", "*/.svn/*", "*/node_modules/*" }, " "),
+    ["SEARCH_INCLUDES"] = "NO",
+    ["EXTRACT_ALL"] = "YES",
+    ["RECURSIVE"] = "YES",
+
+    -- The following is related to the generation destination, so it is recommended not to change it.
     ["OUTPUT_DIRECTORY"] = paths.temp_root,
     ["SHORT_NAMES"] = "NO",
     ["CASE_SENSE_NAMES"] = "NO",

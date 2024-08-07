@@ -86,20 +86,16 @@ require("doxygen-previewer").setup({
       return vim.fs.dirname(vim.api.nvim_buf_get_name(0))
     end,
     --- doxygen options to override.
-    --- By default, to reduce execution time, override the setting so that only files with the same name and different extension (for C/C++ headers) as the file to be previewed are generated.
-    --- Also, other options related to generation are overridden by default.
-    ---@return table
-    override_options = function()
-      return {
-        -- include .h,.c,cpp
-        ["INPUT"] = ".",
-        ["FILE_PATTERNS"] = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(0), ":t:r") .. ".*",
-        ["EXCLUDE_PATTERNS"] = table.concat({ "*/.git/*", "*/.svn/*", "*/node_modules/*" }, " "),
-        ["SEARCH_INCLUDES"] = "NO",
-        ["EXTRACT_ALL"] = "YES",
-        ["RECURSIVE"] = "YES",
-      }
-    end,
+    --- For details, see [Doxygen configuration](https://www.doxygen.nl/manual/config.html).
+    --- Also, other options related to generation are overridden by default. see `Doxygen Options` section in README.md.
+    --- If a function is specified in the value, it will be evaluated at runtime.
+    --- For example:
+    --- override_options = {
+    ---   PROJECT_NAME = "PreviewProject",
+    ---   HTML_EXTRA_STYLESHEET = vim.fn.stdpath("config") .. "/stylesheet.css"
+    --- }
+    --- @type table<string, string|fun():string>
+    override_options = {},
   },
 })
 ```

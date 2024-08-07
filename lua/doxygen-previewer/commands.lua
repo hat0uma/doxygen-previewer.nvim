@@ -41,10 +41,16 @@ function M.open(opts)
   local user_doxyfile_path = user_doxyfile and vim.fs.joinpath(user_doxyfile.dir, user_doxyfile.match) or nil
   local preview_cwd = user_doxyfile and user_doxyfile.dir or opts.doxygen.fallback_cwd()
 
-  -- get doxygen options
+  -- merge Doxygen options
   local paths = util.previewer_paths(opts)
   local doxygen_opts = doxygen.default_override_options(opts, paths)
-  doxygen_opts = vim.tbl_deep_extend("force", doxygen_opts, opts.doxygen.override_options())
+  for k, v in pairs(opts.doxygen.override_options) do
+    if type(v) == "function" then
+      doxygen_opts[k] = v()
+    else
+      doxygen_opts[k] = v
+    end
+  end
 
   util.start_coroutine(function() ---@async
     -- prepare doxyfile for preview
