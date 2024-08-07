@@ -122,4 +122,15 @@ function M.log()
   vim.cmd("tabedit " .. log.LOGFILE_PATH)
 end
 
+function M.open_temp_doxyfile()
+  local opts = config.get()
+  local paths = util.previewer_paths(opts)
+
+  if vim.uv.fs_stat(paths.temp_doxyfile) == nil then
+    log.error("Temporary doxyfile does not exist. Run :DoxygenPreviewerOpen to generate it.")
+    return
+  end
+  vim.cmd("tabedit " .. paths.temp_doxyfile)
+end
+
 return M

@@ -41,6 +41,7 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
     "DoxygenUpdate",
     "DoxygenStop",
     "DoxygenLog",
+    "DoxygenTempDoxyfileOpen"
   },
 }
 
@@ -54,6 +55,7 @@ The plugin provides the following commands:
 - `:DoxygenUpdate` - Manually update the preview.
 - `:DoxygenStop` - Stop the Doxygen documentation preview.
 - `:DoxygenLog` - Open the Doxygen generation log.
+- `:DoxygenTempDoxyfileOpen` - Open the temporary Doxyfile used for preview.
 
 ## Configuration
 
