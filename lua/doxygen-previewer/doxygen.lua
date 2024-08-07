@@ -1,4 +1,4 @@
-local util = require "doxygen-previewer.util"
+local util = require("doxygen-previewer.util")
 local M = {}
 
 --- default override options
@@ -82,7 +82,7 @@ end
 function M.generate_docs_async(opts, paths, cwd)
   local thread = coroutine.running()
   if not thread then
-    error "this function must be called in coroutine."
+    error("this function must be called in coroutine.")
   end
 
   -- run doxygen
@@ -147,7 +147,7 @@ end
 function M.prepare_doxyfile_for_preview(opts, paths, doxygen_opts, user_doxyfile)
   local thread = coroutine.running()
   if not thread then
-    error "this function must be called in coroutine."
+    error("this function must be called in coroutine.")
   end
 
   -- create temporary dir

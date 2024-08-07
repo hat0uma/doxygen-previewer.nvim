@@ -1,5 +1,5 @@
-local config = require "doxygen-previewer.config"
-local commands = require "doxygen-previewer.commands"
+local commands = require("doxygen-previewer.commands")
+local config = require("doxygen-previewer.config")
 local M = {}
 
 --- setup

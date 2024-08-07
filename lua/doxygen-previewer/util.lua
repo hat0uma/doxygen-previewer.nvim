@@ -1,6 +1,6 @@
 local M = {}
 
-local log = require "doxygen-previewer.log"
+local log = require("doxygen-previewer.log")
 
 ---@async
 ---mkdir async
@@ -45,7 +45,7 @@ function M.start_coroutine(fn)
 
   coroutine.resume(thread)
   if coroutine.status(thread) == "dead" then
-    error "Failed to start coroutine."
+    error("Failed to start coroutine.")
   end
 end
 

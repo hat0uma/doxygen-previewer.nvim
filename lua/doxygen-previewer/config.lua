@@ -3,7 +3,7 @@ local M = {}
 --- @class DoxygenPreviewerOptions
 M.defaults = {
   --- Path to output doxygen results
-  tempdir = vim.fn.stdpath "cache",
+  tempdir = vim.fn.stdpath("cache"),
   --- If true, update automatically when saving.
   update_on_save = true,
   --- doxygen settings section

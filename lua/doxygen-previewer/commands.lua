@@ -1,8 +1,8 @@
-local util = require "doxygen-previewer.util"
-local config = require "doxygen-previewer.config"
-local doxygen = require "doxygen-previewer.doxygen"
-local log = require "doxygen-previewer.log"
-local prelive = require "prelive"
+local config = require("doxygen-previewer.config")
+local doxygen = require("doxygen-previewer.doxygen")
+local log = require("doxygen-previewer.log")
+local prelive = require("prelive")
+local util = require("doxygen-previewer.util")
 
 local M = {}
 
@@ -54,9 +54,9 @@ function M.open(opts)
     M.preview_cwd = preview_cwd
 
     -- generate docs
-    log.debug "Generating documentation..."
+    log.debug("Generating documentation...")
     local obj = doxygen.generate_docs_async(opts, paths, M.preview_cwd)
-    log.debug "Documentation generated."
+    log.debug("Documentation generated.")
 
     -- on generate completed
     vim.schedule(function()
@@ -88,16 +88,16 @@ function M.update(opts)
   end
 
   if M.preview_bufnr == nil then
-    log.info "Buffer in preview does not exist."
+    log.info("Buffer in preview does not exist.")
     return
   end
 
   local paths = util.previewer_paths(opts)
   util.start_coroutine(function() ---@async
     --- run doxygen
-    log.debug "Generating documentation..."
+    log.debug("Generating documentation...")
     local obj = doxygen.generate_docs_async(opts, paths, M.preview_cwd)
-    log.debug "Documentation generated."
+    log.debug("Documentation generated.")
 
     -- on generate completed
     vim.schedule(function()

@@ -1,7 +1,7 @@
 --- This module is responsible for logging the output of the doxygen command.
 ---@class DoxygenPreviewerLogMod: prelive.log.Logger
 local M = {
-  LOGFILE_PATH = vim.fn.stdpath "log" .. "/doxygen-previewer.log",
+  LOGFILE_PATH = vim.fn.stdpath("log") .. "/doxygen-previewer.log",
 }
 
 ---@type prelive.log.Logger | nil
