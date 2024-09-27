@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: kdheepak/panvimdoc@main
         with:
-          vimdoc: prelive
+          vimdoc: doxygen-previewer
           version: "Neovim >= 0.10.1"
           treesitter: true
       - uses: stefanzweifel/git-auto-commit-action@v4
