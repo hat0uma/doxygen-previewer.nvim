@@ -13,7 +13,7 @@ A Neovim plugin for previewing Doxygen documentation.
 
 ## Requirements
 
-- Neovim Nightly
+- Neovim v0.10.1 or later
 - Doxygen
 - [prelive.nvim](https://github.com/hat0uma/prelive.nvim) (for live preview)
 
