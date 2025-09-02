@@ -139,3 +139,5 @@ function M.open_temp_doxyfile()
 end
 
 return M
+
+-- vim:ts=2:sts=2:sw=2:et:

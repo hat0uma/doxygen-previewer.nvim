@@ -186,3 +186,5 @@ function M.prepare_doxyfile_for_preview(opts, paths, doxygen_opts, user_doxyfile
 end
 
 return M
+
+-- vim:ts=2:sts=2:sw=2:et:
