@@ -2,32 +2,34 @@ local M = {}
 
 local log = require("doxygen-previewer.log")
 
----@async
----mkdir async
----@param path string
----@param mode number
----@param thread thread
----@return boolean ok, string | nil err
+--- @async
+--- `mkdir` async
+--- @param path string
+--- @param mode integer
+--- @param thread thread
+--- @return boolean ok
+--- @return string | nil err
 function M.mkdir_async(path, mode, thread)
   vim.uv.fs_mkdir(path, mode, function(err, ok)
     coroutine.resume(thread, err, ok)
   end)
-  ---@type string|nil,boolean
+  --- @type string|nil,boolean
   local err, ok = coroutine.yield()
   return ok, err
 end
 
----@async
----copy file async
----@param src string
----@param dest string
----@param thread thread
----@return boolean ok, string | nil err
+--- @async
+--- Copy file async
+--- @param src string
+--- @param dest string
+--- @param thread thread
+--- @return boolean ok
+--- @return string | nil err
 function M.copyfile_async(src, dest, thread)
   vim.uv.fs_copyfile(src, dest, function(err, ok)
     coroutine.resume(thread, err, ok)
   end)
-  ---@type string|nil,boolean
+  --- @type string|nil,boolean
   local err, ok = coroutine.yield()
   return ok, err
 end
@@ -48,14 +50,9 @@ function M.start_coroutine(fn)
   end
 end
 
----@class DoxygenPreviewerPaths
----@field temp_root string
----@field temp_doxyfile string
----@field temp_htmldir string
-
---- get previewer paths
----@param opts DoxygenPreviewerOptions
----@return DoxygenPreviewerPaths
+--- Get previewer paths
+--- @param opts DoxygenPreviewerOptions
+--- @return DoxygenPreviewerPaths
 function M.previewer_paths(opts)
   local root = vim.fs.joinpath(opts.tempdir, "doxygen-previewer")
 

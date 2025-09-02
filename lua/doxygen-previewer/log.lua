@@ -6,7 +6,7 @@ M.LOGFILE_PATH = vim.fn.stdpath("log") .. "/doxygen-previewer.log"
 ---@type prelive.log.Logger | nil
 local logger
 
---- setup logger
+--- Setup logger
 ---@return prelive.log.Logger
 function M.setup()
   logger = require("prelive.core.log").new_logger()

@@ -1,13 +1,10 @@
 local commands = require("doxygen-previewer.commands")
 local config = require("doxygen-previewer.config")
+
+---@class DoxygenPreviewer
 local M = {}
 
---- setup
----@param opts? DoxygenPreviewerOptions
-function M.setup(opts)
-  config.setup(opts)
-end
-
+M.setup = config.setup
 M.open = commands.open
 M.update = commands.update
 

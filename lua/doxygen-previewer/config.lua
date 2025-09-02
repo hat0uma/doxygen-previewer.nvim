@@ -1,3 +1,4 @@
+--- @class DoxygenPreviewerConfig
 local M = {}
 
 --- @class DoxygenPreviewerOptions
@@ -35,7 +36,7 @@ M.defaults = {
     ---   HTML_EXTRA_STYLESHEET = vim.fn.stdpath("config") .. "/stylesheet.css"
     --- }
     --- ```
-    --- @type table<string, string|fun():string>
+    --- @type table<string, string|fun(): string>
     override_options = {},
   },
 }
@@ -43,9 +44,9 @@ M.defaults = {
 --- @type DoxygenPreviewerOptions
 M.options = {}
 
---- get config
----@param opts? DoxygenPreviewerOptions
----@return DoxygenPreviewerOptions
+--- Get config
+--- @param opts? DoxygenPreviewerOptions
+--- @return DoxygenPreviewerOptions
 function M.get(opts)
   return vim.tbl_deep_extend("force", M.options, opts or {})
 end

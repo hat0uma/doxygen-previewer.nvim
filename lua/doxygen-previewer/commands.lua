@@ -51,7 +51,7 @@ function M.open(opts)
     end
   end
 
-  util.start_coroutine(function() ---@async
+  util.start_coroutine(function() --- @async
     -- prepare doxyfile for preview
     doxygen.prepare_doxyfile_for_preview(opts, paths, doxygen_opts, user_doxyfile_path)
 
@@ -83,8 +83,8 @@ function M.open(opts)
   end)
 end
 
---- update docs
----@param opts? DoxygenPreviewerOptions
+--- Update docs
+--- @param opts? DoxygenPreviewerOptions
 function M.update(opts)
   opts = config.get(opts)
   if vim.fn.executable(opts.doxygen.cmd) ~= 1 then
@@ -98,7 +98,7 @@ function M.update(opts)
   end
 
   local paths = util.previewer_paths(opts)
-  util.start_coroutine(function() ---@async
+  util.start_coroutine(function() --- @async
     --- run doxygen
     log.debug("Generating documentation...")
     local obj = doxygen.generate_docs_async(opts, paths, M.preview_cwd)
