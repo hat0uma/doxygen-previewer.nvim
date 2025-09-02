@@ -19,8 +19,10 @@ M.defaults = {
       "doc/Doxyfile",
     },
     --- If the pattern in `doxyfile_patterns` setting is not found, use this parameter as cwd when running doxygen.
+    --- @return string?
     fallback_cwd = function()
-      return vim.fs.dirname(vim.api.nvim_buf_get_name(0))
+      local bufnr = vim.api.nvim_get_current_buf()
+      return vim.fs.dirname(vim.api.nvim_buf_get_name(bufnr))
     end,
     --- doxygen options to override.
     --- For details, see [Doxygen configuration](https://www.doxygen.nl/manual/config.html).
@@ -48,8 +50,8 @@ function M.get(opts)
   return vim.tbl_deep_extend("force", M.options, opts or {})
 end
 
---- setup
----@param opts? DoxygenPreviewerOptions
+--- Setup `doxygen-previewer.nvim`
+--- @param opts? DoxygenPreviewerOptions
 function M.setup(opts)
   M.options = vim.tbl_deep_extend("force", M.defaults, opts or {})
 end

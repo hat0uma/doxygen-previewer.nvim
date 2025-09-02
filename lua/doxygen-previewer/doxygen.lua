@@ -6,11 +6,12 @@ local M = {}
 ---@param paths DoxygenPreviewerPaths
 ---@return table<string,string>
 function M.default_override_options(opts, paths)
+  local bufnr = vim.api.nvim_get_current_buf()
   return {
     --- By default, to reduce execution time, override the setting so that only files with the same name and different extension (for C/C++ headers) as the file to be previewed are generated.
     -- include .h,.c,cpp
     ["INPUT"] = ".",
-    ["FILE_PATTERNS"] = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(0), ":t:r") .. ".*",
+    ["FILE_PATTERNS"] = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ":t:r") .. ".*",
     ["EXCLUDE_PATTERNS"] = table.concat({ "*/.git/*", "*/.svn/*", "*/node_modules/*" }, " "),
     ["SEARCH_INCLUDES"] = "NO",
     ["EXTRACT_ALL"] = "YES",
@@ -76,7 +77,6 @@ end
 ---@param thread thread
 ---@return vim.SystemCompleted
 function M.generate_doxyfile_async(opts, paths, thread)
-  -- generate doxyfile
   vim.system({ opts.doxygen.cmd, "-g", paths.temp_doxyfile }, { text = true }, function(obj)
     coroutine.resume(thread, obj)
   end)
@@ -102,9 +102,9 @@ function M.generate_docs_async(opts, paths, cwd)
   return coroutine.yield() ---@type vim.SystemCompleted
 end
 
---- get hrtml name from source file
----@param bufnr integer
----@return string
+--- Get HTML name from source file
+--- @param bufnr integer
+--- @return string
 function M.get_html_name(bufnr)
   -- escapeCharsInString
   -- TODO:unicode name encode

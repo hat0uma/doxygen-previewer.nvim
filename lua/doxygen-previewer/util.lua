@@ -33,8 +33,7 @@ function M.copyfile_async(src, dest, thread)
 end
 
 --- Start coroutine
----@param fn async fun()
----@vararg any
+--- @param fn async fun(...: any)
 function M.start_coroutine(fn)
   local thread = coroutine.create(function()
     local ok, err = pcall(fn)
@@ -59,34 +58,39 @@ end
 ---@return DoxygenPreviewerPaths
 function M.previewer_paths(opts)
   local root = vim.fs.joinpath(opts.tempdir, "doxygen-previewer")
-  return {
+
+  --- @class DoxygenPreviewerPaths
+  local paths = {
     temp_root = root,
     temp_doxyfile = vim.fs.joinpath(root, "Doxyfile"),
     temp_htmldir = vim.fs.joinpath(root, "html"),
   }
+  return paths
 end
 
---- find file patterns upward from start_dir
----@param patterns string[]
----@param start_dir string
----@return {dir:string ,match:string}?
-function M.find_upward(patterns, start_dir)
-  local find = function(dir)
-    for _, pattern in ipairs(patterns) do
-      if vim.uv.fs_access(vim.fs.joinpath(dir, pattern), "R") then
-        return { dir = dir, match = pattern }
-      end
+--- @param dir string
+--- @return { dir: string , match: string }?
+local function find(dir, patterns)
+  for _, pattern in ipairs(patterns) do
+    if vim.uv.fs_access(vim.fs.joinpath(dir, pattern), "R") then
+      return { dir = dir, match = pattern }
     end
-    return nil
   end
+  return nil
+end
 
-  local match = find(start_dir)
+--- Find file patterns upward from start_dir
+--- @param patterns string[]
+--- @param start_dir string
+--- @return { dir: string , match: string }?
+function M.find_upward(patterns, start_dir)
+  local match = find(start_dir, patterns)
   if match then
     return match
   end
 
   for dir in vim.fs.parents(start_dir) do
-    match = find(dir)
+    match = find(dir, patterns)
     if match then
       return match
     end
