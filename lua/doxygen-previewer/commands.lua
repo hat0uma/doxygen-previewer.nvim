@@ -4,15 +4,14 @@ local log = require("doxygen-previewer.log")
 local prelive = require("prelive")
 local util = require("doxygen-previewer.util")
 
+--- @class DoxygenPreviewerCmd
+--- @field preview_bufnr? integer
+--- @field preview_cwd? string
 local M = {}
 
---- @type integer|nil
-M.preview_bufnr = nil
-M.preview_cwd = nil
-
---- start update on save
----@param opts DoxygenPreviewerOptions
----@param bufnr integer
+--- Start update on save
+--- @param opts DoxygenPreviewerOptions
+--- @param bufnr integer
 local function start_update(opts, bufnr)
   vim.api.nvim_create_autocmd("BufWritePost", {
     callback = function()
@@ -23,8 +22,8 @@ local function start_update(opts, bufnr)
   })
 end
 
---- generate docs and open viewer
----@param opts? DoxygenPreviewerOptions
+--- Generate docs and open viewer
+--- @param opts? DoxygenPreviewerOptions
 function M.open(opts)
   opts = config.get(opts)
   if vim.fn.executable(opts.doxygen.cmd) ~= 1 then
@@ -52,7 +51,7 @@ function M.open(opts)
     end
   end
 
-  util.start_coroutine(function() ---@async
+  util.start_coroutine(function() --- @async
     -- prepare doxyfile for preview
     doxygen.prepare_doxyfile_for_preview(opts, paths, doxygen_opts, user_doxyfile_path)
 
@@ -84,8 +83,8 @@ function M.open(opts)
   end)
 end
 
---- update docs
----@param opts? DoxygenPreviewerOptions
+--- Update docs
+--- @param opts? DoxygenPreviewerOptions
 function M.update(opts)
   opts = config.get(opts)
   if vim.fn.executable(opts.doxygen.cmd) ~= 1 then
@@ -99,7 +98,7 @@ function M.update(opts)
   end
 
   local paths = util.previewer_paths(opts)
-  util.start_coroutine(function() ---@async
+  util.start_coroutine(function() --- @async
     --- run doxygen
     log.debug("Generating documentation...")
     local obj = doxygen.generate_docs_async(opts, paths, M.preview_cwd)
@@ -125,18 +124,20 @@ function M.stop()
 end
 
 function M.log()
-  vim.cmd("tabedit " .. log.LOGFILE_PATH)
+  vim.cmd.tabedit(log.LOGFILE_PATH)
 end
 
+--- Attempt to open a temporary Doxyfile
 function M.open_temp_doxyfile()
-  local opts = config.get()
-  local paths = util.previewer_paths(opts)
+  local paths = util.previewer_paths(config.get())
 
   if vim.uv.fs_stat(paths.temp_doxyfile) == nil then
     log.error("Temporary doxyfile does not exist. Run :DoxygenPreviewerOpen to generate it.")
     return
   end
-  vim.cmd("tabedit " .. paths.temp_doxyfile)
+  vim.cmd.tabedit(paths.temp_doxyfile)
 end
 
 return M
+
+-- vim:ts=2:sts=2:sw=2:et:
